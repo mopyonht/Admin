@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+
+  <!-- FORMULAIRE LOGIN -->
+  <div id="adminLoginForm" class="login-container">
+    <div class="login-card">
+      <h1>🔐 Admin Dashboard</h1>
+      
+      <div id="existingAdminForm">
+        <h2>Konekte kòm Admin</h2>
+        <input type="email" id="adminEmail" placeholder="Email" class="input-field">
+        <input type="password" id="adminPassword" placeholder="Modpas Pèsonèl" class="input-field">
+        <input type="password" id="generalPassword" placeholder="Modpas Jeneral" class="input-field">
+        <button onclick="adminAuth.loginExistingAdmin()" class="btn-primary">Konekte</button>
+        <button onclick="adminAuth.toggleRequestForm()" class="btn-link">Demann aksè admin</button>
+      </div>
+      
+      <div id="newAdminRequestForm" style="display:none;">
+        <h2>Demann Aksè Admin</h2>
+        <input type="text" id="requestFullName" placeholder="Non Konplè" class="input-field">
+        <input type="email" id="requestEmail" placeholder="Email" class="input-field">
+        <input type="password" id="requestPassword" placeholder="Modpas Pèsonèl" class="input-field">
+        <input type="password" id="requestConfirmPassword" placeholder="Konfime Modpas" class="input-field">
+        <button onclick="adminAuth.requestAdminAccess()" class="btn-primary">Voye Demann</button>
+        <button onclick="adminAuth.toggleRequestForm()" class="btn-link">Retounen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGE EN ATTENTE -->
+  <div id="adminPending" class="pending-container" style="display:none;">
+    <div class="pending-card">
+      <h1>⏳ Demann ou an atant</h1>
+      <p>Admin chef la ap revize demann ou. Ou ap resevwa yon imèl lè li aksepte ou.</p>
+      <button onclick="auth.signOut()" class="btn-secondary">Retounen</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PRINCIPAL -->
+  <div id="adminDashboard" class="dashboard-container" style="display:none;">
+    
+    <!-- HEADER -->
+    <header class="dashboard-header">
+      <div class="header-left">
+        <h1>📊 Admin Dashboard</h1>
+        <span class="admin-info">
+          <span id="adminName">Admin</span> | 
+          <span id="adminRole">Admin</span>
+        </span>
+      </div>
+      <button onclick="adminAuth.logoutAdmin()" class="btn-logout">Dekonekte</button>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <div class="dashboard-tabs">
+      <button class="tab-btn active" onclick="switchDashboardTab('pending')">
+        ⏳ Tounwa an Atant
+      </button>
+
+      <button class="tab-btn" onclick="switchDashboardTab('stats')">
+        📈 Estatistik
+      </button>
+      <button class="tab-btn" onclick="switchDashboardTab('transactions')">
+        💰 Transaksyon
+      </button>
+      <button class="tab-btn" onclick="switchDashboardTab('create')">
+        ➕ Kreye Tounwa
+      </button>
+      <button class="tab-btn" onclick="switchDashboardTab('deposits')">
+  💰 Dépôts en Attente
+</button>
+      <button class="tab-btn" id="adminManagementTab" onclick="switchDashboardTab('admins')" style="display:none;">
+        👥 Jesyon Admin
+      </button>
+    </div>
+    
+    <!-- SÉLECTEUR DE JEU -->
+<div class="game-selector-container">
+  <h2>Sélectionne un jeu</h2>
+  <div class="game-selector-buttons">
+    <button class="game-btn active" onclick="selectGame('dino')">🦕 Dino Game</button>
+    <button class="game-btn" onclick="selectGame('puzzle')">🧩 Puzzle</button>
+    <button class="game-btn" onclick="selectGame('idantik')">🟢🟢🟢 Idantik</button>
+  </div>
+</div>
+
+<hr style="margin: 30px 0;">
+
+
+    <!-- CONTENU TABS -->
+    <!-- NOUVELLE SECTION: TOURNOIS ACTIFS -->
+<div class="admin-section">
+  <div class="section-header">
+    <h2>🟢 Tournois Actifs</h2>
+    <button onclick="window.adminDashboard.loadActiveTournaments()" class="btn-refresh">
+      🔄 Actualiser
+    </button>
+  </div>
+  <div id="activeTournamentsList" class="tournaments-grid">
+    <div class="loading">Chargement...</div>
+  </div>
+</div>
+    <!-- TAB: TOURNOIS EN ATTENTE -->
+    <div id="tabPending" class="tab-content active">
+      <div id="pendingTournamentsList" class="pending-list">
+        <div class="loading">Chajman...</div>
+      </div>
+    </div>
+
+    <!-- TAB: STATISTIQUES -->
+    <div id="tabStats" class="tab-content" style="display:none;">
+      <div class="stats-controls">
+        <label>Peryòd:</label>
+        <select id="statsPeriod" onchange="adminDashboard.loadStatistics()">
+          <option value="day">Jodi a</option>
+          <option value="week">Semèn sa</option>
+          <option value="month">Mwa sa</option>
+        </select>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">💰 Total Kanyo</div>
+          <div class="stat-value" id="statTotalPot">0 GDS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">🎮 Total Pati</div>
+          <div class="stat-value" id="statTotalGames">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">👥 Jwè Inik</div>
+          <div class="stat-value" id="statUniquePlayers">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">💸 Depo</div>
+          <div class="stat-value" id="statDeposits">0 GDS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">💳 Retrè</div>
+          <div class="stat-value" id="statWithdrawals">0 GDS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">📱 Abònman</div>
+          <div class="stat-value" id="statSubscriptions">0 GDS</div>
+        </div>
+        <div class="stat-box highlight">
+          <div class="stat-label">📊 OU Komisyon (20%)</div>
+          <div class="stat-value" id="statCommission">0 GDS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: TRANSACTIONS -->
+    <div id="tabTransactions" class="tab-content" style="display:none;">
+      <div class="transactions-controls">
+        <select id="transactionType" onchange="adminDashboard.loadTransactionsHistory()">
+          <option value="all">Tout Tip</option>
+          <option value="deposit">Depo</option>
+          <option value="withdrawal">Retrè</option>
+          <option value="tournament_entry">Pati Tounwa</option>
+          <option value="tournament_win">Genyen</option>
+          <option value="subscription">Abònman</option>
+        </select>
+        
+        <select id="transactionPeriod" onchange="adminDashboard.loadTransactionsHistory()">
+          <option value="day">Jodi a</option>
+          <option value="week">Semèn sa</option>
+          <option value="month">Mwa sa</option>
+        </select>
+        
+        <button onclick="adminDashboard.exportTransactionsCSV()" class="btn-export">
+          📥 Ekspòte CSV
+        </button>
+      </div>
+      
+      <div id="transactionsHistoryList" class="transactions-list">
+        <div class="loading">Chajman...</div>
+      </div>
+    </div>
+
+    <!-- TAB: CRÉER TOURNOIS -->
+    <div id="tabCreate" class="tab-content" style="display:none;">
+      <div class="creators-grid">
+        <div id="hourlyTournamentCreator" class="creator-section"></div>
+        <div id="dailyTournamentCreator" class="creator-section"></div>
+      </div>
+    </div>
+
+    <!-- TAB: GESTION ADMINS (Chief seulement) -->
+    <div id="tabAdmins" class="tab-content" style="display:none;">
+      <div id="adminManagementSection" style="display:none;">
+        <h2>👥 Jesyon Admin</h2>
+        
+        <div class="admin-section">
+          <h3>⏳ Demann an Atant (<span id="pendingAdminsCount">0</span>)</h3>
+          <div id="pendingAdminsList" class="admins-list">
+            <div class="loading">Chajman...</div>
+          </div>
+        </div>
+        
+        <div class="admin-section">
+          <h3>✅ Admin Aktif (<span id="activeAdminsCount">0</span>)</h3>
+          <div id="activeAdminsList" class="admins-list">
+            <div class="loading">Chajman...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TAB: DÉPÔTS EN ATTENTE -->
+<div id="tabDeposits" class="tab-content" style="display:none;">
+  <div id="pendingDepositsList" class="pending-list">
+    <div class="loading">Chargement...</div>
+  </div>
+</div>
+
+  </div>
+
+  <!-- MODALS -->
+  
+  <!-- Modal: Détails Tournoi -->
+  <div id="tournamentDetailsModal" class="modal">
+    <div class="modal-content large">
+      <button onclick="adminDashboard.closeAdminModal('tournamentDetailsModal')" class="modal-close">✕</button>
+      <div id="tournamentDetailsContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Créer Départage -->
+  <div id="tiebreakerCreatorModal" class="modal">
+    <div class="modal-content">
+      <button onclick="adminDashboard.closeAdminModal('tiebreakerCreatorModal')" class="modal-close">✕</button>
+      <h2>⚔️ Kreye Tounwa Depataj</h2>
+      
+      <form id="tiebreakerForm" onsubmit="event.preventDefault(); adminDashboard.createTiebreakerTournament();">
+        <div class="form-group">
+          <label>Tounwa Orijinal:</label>
+          <div id="tiebreakerOriginalTournament" class="form-value"></div>
+        </div>
+        
+        <div class="form-group">
+          <label>Jwè nan Egalite:</label>
+          <div id="tiebreakerPlayerCount" class="form-value"></div>
+        </div>
+        
+        <div class="form-group">
+          <label>Prize (GDS):</label>
+          <input type="number" id="tiebreakerPrize" min="1" required class="input-field">
+        </div>
+        
+        <div class="form-group">
+          <label>Dire (minit):</label>
+          <input type="number" id="tiebreakerDuration" min="5" max="120" required class="input-field">
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">🚀 Kreye & Notifye</button>
+          <button type="button" onclick="adminDashboard.closeAdminModal('tiebreakerCreatorModal')" class="btn-secondary">Anile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Modal Participants (sera créé dynamiquement mais on peut le prévoir) -->
+<div id="participantsModal" class="participants-modal">
+  <div class="participants-modal-content">
+    <div class="participants-modal-header">
+      <h2 id="participantsModalTitle">Participants</h2>
+      <button onclick="window.adminDashboard.closeParticipantsModal()" class="btn-close-modal">×</button>
+    </div>
+    <div id="participantsModalBody">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+</div>
+
+  <!-- ===== SCRIPTS FIREBASE V8 ===== -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <!-- Tes scripts -->
+  <script src="firebaseConfig.js"></script>
+  <script src="adminAuth.js"></script>
+  <script src="adminDashboard.js"></script>
+  
+  <script>
+    function switchDashboardTab(tab) {
+      // Désactiver tous
+      document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(function(content) {
+        content.style.display = 'none';
+      });
+      
+      // Activer sélectionné
+      event.target.classList.add('active');
+      document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+      
+      // Charger données si nécessaire
+      if (tab === 'stats') {
+        adminDashboard.loadStatistics();
+      } else if (tab === 'transactions') {
+        adminDashboard.loadTransactionsHistory();
+      } else if (tab === 'admins' && window.adminAuth.currentAdmin && window.adminAuth.currentAdmin.role === 'chief') {
+        var mgmtSection = document.getElementById('adminManagementSection');
+        if (mgmtSection) mgmtSection.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
